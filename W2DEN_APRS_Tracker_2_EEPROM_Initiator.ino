@@ -1,6 +1,6 @@
 /* this is to load the Teensy 3.1's EEPROM with the user definable data
  *
- *  updated for Tracker v 2.01
+ *  updated for Tracker v 2.02
  * 
  *  this can be optimized, but why bother?
  *
@@ -31,6 +31,7 @@ uint16_t axVoxOn        = 0;     // mseconds vox tone sent to xmitter 0 for off
 uint16_t axVoxSilent    = 0;     // mseconds VOX tone silent  0 for off
 uint16_t pttPin         = 13;    // PTT Teensy Pin usually 13, 0 for off
 int8_t   tftOnOff       = 1;     // TFT onn(1) or off (0)
+uint16_t squelch        = 100;   // squelch threshold 
 
 
 int ptr = 0 ; //EEPROM pointer
@@ -78,6 +79,7 @@ void setup() {
   Serial.println(axVoxSilent);     // mseconds VOX tone silent  0 for off
   Serial.println(pttPin);
   Serial.println(tftOnOff);
+  Serial.println(squelch);
   Serial.println();
 
   ////////////////////////////// now save to EEPROM
@@ -125,6 +127,8 @@ void setup() {
   EEPROM.updateInt(ptr++, pttPin);
   ptr++;
   EEPROM.update(ptr++, tftOnOff);  // note this is a single byte.
+  EEPROM.updateInt(ptr++, squelch);
+  ptr++;
 
 
   /////////////////////////////// read back from EEPROM
@@ -150,6 +154,7 @@ void setup() {
   axVoxSilent    = 0;    // mseconds VOX tone silent  0 for off
   pttPin         = 0;    // PTT Teensy Pin usually 13, 0 for off
   tftOnOff       = 0;
+  squelch        = 0;
 
   char check = EEPROM.read(ptr++); // 0
   utc = EEPROM.read(ptr++);        // 1
@@ -199,6 +204,8 @@ void setup() {
   pttPin         = EEPROM.readInt(ptr++);
   ptr++;
   tftOnOff       = EEPROM.read(ptr++); // tft on/off single byte
+  squelch        = EEPROM.readInt(ptr++);
+  ptr++;
 
   ////////////////////////////// output
   Serial.println();
@@ -241,12 +248,13 @@ void setup() {
   else {
     Serial.println("TFT Off");
   }
-  
+  Serial.println(squelch);
+/////////////////////////////////// now just a dump  
   if (check == '*') {
     Serial.println("Check eePROM dump:");
   }
   int r;
-  for (int i = 0; i < 81; i++) {
+  for (int i = 0; i < 83; i++) {
     r = EEPROM.read(i);
     Serial.print(i);
     Serial.print(": ");
